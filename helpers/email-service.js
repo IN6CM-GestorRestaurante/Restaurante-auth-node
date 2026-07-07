@@ -35,23 +35,32 @@ export const sendVerificationEmail = async (email, name, verificationToken) => {
   }
 
   try {
-    const frontendUrl = config.app.frontendUrl || 'http://localhost:3000';
-    const verificationUrl = `${frontendUrl}/verify-email?token=${verificationToken}`;
-
     const mailOptions = {
       from: `${config.smtp.fromName} <${config.smtp.fromEmail}>`,
       to: email,
-      subject: 'Verifica tu correo electrónico - Gestor de Restaurante',
+      subject: 'Verifica tu correo electrónico',
       html: `
-        <h2>¡Bienvenido a Gestor de Restaurante, ${name}!</h2>
-        <p>Por favor, verifica tu correo electrónico para tu cuenta de Gestor de Restaurante haciendo clic en el siguiente enlace:</p>
-        <a href='${verificationUrl}' style='background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>
-            Verificar correo
-        </a>
-        <p>Si no puedes hacer clic en el enlace, copia y pega esta URL en tu navegador:</p>
-        <p>${verificationUrl}</p>
-        <p>Este enlace expirará en 24 horas.</p>
-        <p>Si no creaste una cuenta, ignora este correo.</p>
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eaeaea; border-radius: 8px;">
+          <h2 style="color: #8c2a11; text-align: center;">Verifica tu correo electrónico</h2>
+          <p style="color: #333; font-size: 16px;">Hola <strong>${name}</strong>,</p>
+          <p style="color: #555; font-size: 14px; line-height: 1.5;">
+            Gracias por registrarte en nuestra plataforma de administración de restaurantes. Para
+            completar tu registro y activar tu cuenta, por favor introduce el siguiente código de
+            verificación de 6 dígitos:
+          </p>
+          <div style="background-color: #fff4ea; padding: 20px; text-align: center; border-radius: 8px; margin: 20px 0;">
+            <span style="font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #7b1e06;">
+              ${verificationToken}
+            </span>
+          </div>
+          <p style="color: #777; font-size: 12px; margin-top: 20px;">
+            Este código de un solo uso (OTP) es válido por los próximos 15 minutos.
+          </p>
+          <hr style="border: none; border-top: 1px solid #eaeaea; margin: 20px 0;" />
+          <p style="color: #999; font-size: 11px; text-align: center;">
+            Si no solicitaste esta cuenta, puedes ignorar este correo de forma segura.
+          </p>
+        </div>
       `,
     };
 

@@ -64,10 +64,9 @@ export const validateRegister = [
     .withMessage('La contraseña debe tener entre 6 y 255 caracteres'),
 
   body('phone')
-    .notEmpty()
-    .withMessage('El número de teléfono es obligatorio')
-    .matches(/^\d{8}$/)
-    .withMessage('El número de teléfono debe tener exactamente 8 dígitos'),
+    .optional({ checkFalsy: true })
+    .matches(/^\+?\d{1,4}\s?\d{8,12}$/)
+    .withMessage('El número de teléfono no tiene un formato válido'),
 
   handleValidationErrors,
 ];

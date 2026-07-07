@@ -171,7 +171,7 @@ export const loginUserHelper = async (emailOrUsername, password) => {
     }
 
     // Verificar si el email está verificado
-    if (!user.UserEmail || !user.UserEmail.EmailVerified) {
+    if (!user.EmailVerified) {
       throw new Error(
         'Debes verificar tu email antes de iniciar sesión. Revisa tu bandeja de entrada o reenvía el email de verificación.'
       );
@@ -226,7 +226,7 @@ export const loginUserHelper = async (emailOrUsername, password) => {
 
 export const verifyEmailHelper = async (token) => {
   try {
-    if (!token || typeof token !== 'string' || token.length < 40) {
+    if (!token || typeof token !== 'string' || token.length < 6) {
       throw new Error('Token inválido para verificación de email');
     }
 
@@ -235,12 +235,7 @@ export const verifyEmailHelper = async (token) => {
       throw new Error('Usuario no encontrado o token inválido');
     }
 
-    const userEmail = user.UserEmail;
-    if (!userEmail) {
-      throw new Error('Registro de email no encontrado');
-    }
-
-    if (userEmail.EmailVerified) {
+    if (user.EmailVerified) {
       throw new Error('El email ya ha sido verificado');
     }
 
@@ -283,7 +278,7 @@ export const resendVerificationEmailHelper = async (email) => {
       };
     }
 
-    if (user.UserEmail && user.UserEmail.EmailVerified) {
+    if (user.EmailVerified) {
       return {
         success: false,
         message: 'El email ya ha sido verificado',
@@ -377,8 +372,7 @@ export const resetPasswordHelper = async (token, newPassword) => {
       throw new Error('Usuario no encontrado o token inválido');
     }
 
-    const userPasswordReset = user.UserPasswordReset;
-    if (!userPasswordReset || !userPasswordReset.PasswordResetToken) {
+    if (!user.PasswordResetToken) {
       throw new Error('Token de reset inválido o ya utilizado');
     }
 

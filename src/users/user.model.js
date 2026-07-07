@@ -1,86 +1,38 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../../configs/db.js';
-import { generateUserId } from '../../helpers/uuid-generator.js';
 
-// Modelo User principal (equivalente a User.cs en .NET) - usando snake_case
+// Modelo User monolítico unificado
 export const User = sequelize.define(
   'User',
   {
     Id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
-      autoIncrement: true,
       field: 'id',
     },
-    Name: {
-      type: DataTypes.STRING(25),
-      allowNull: true, // Nullable para que .NET no falle al insertar sin este campo
-      field: 'name',
-      validate: {
-        len: {
-          args: [0, 25],
-          msg: 'El nombre no puede tener más de 25 caracteres.',
-        },
-      },
-    },
-    Surname: {
-      type: DataTypes.STRING(25),
-      allowNull: true, // Nullable
-      field: 'surname',
-      validate: {
-        len: {
-          args: [0, 25],
-          msg: 'El apellido no puede tener más de 25 caracteres.',
-        },
-      },
-    },
-    Username: {
-      type: DataTypes.STRING(50),
-      allowNull: true, // Nullable
-      unique: true,
-      field: 'username',
-      validate: {
-        len: {
-          args: [0, 50],
-          msg: 'El nombre de usuario no puede tener más de 50 caracteres.',
-        },
-      },
-    },
     Email: {
-      type: DataTypes.STRING(150),
+      type: DataTypes.STRING(256),
       allowNull: false,
       unique: true,
       field: 'email',
-      validate: {
-        notEmpty: { msg: 'El correo electrónico es obligatorio.' },
-        isEmail: { msg: 'El correo electrónico no tiene un formato válido.' },
-        len: {
-          args: [1, 150],
-          msg: 'El correo electrónico no puede tener más de 150 caracteres.',
-        },
-      },
     },
     Password: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.STRING(512),
       allowNull: false,
-      field: 'password_hash', // Mapeado a la columna 'password_hash' de .NET
+      field: 'password_hash',
     },
     Role: {
-      type: DataTypes.STRING(50),
+      type: DataTypes.STRING(64),
       allowNull: false,
-      defaultValue: 'CLIENT', // CLIENT, WAITER, CHEF, CASHIER, ADMIN
+      defaultValue: 'CLIENT',
       field: 'role',
     },
     Status: {
       type: DataTypes.BOOLEAN,
-      defaultValue: true, // Activo por defecto en restaurantes
+      defaultValue: true,
       allowNull: false,
-      field: 'is_active', // Mapeado a la columna 'is_active' de .NET
-    },
-    MongoId: {
-      type: DataTypes.STRING(50),
-      allowNull: true,
-      field: 'mongo_id', // Enlace con MongoDB
+      field: 'is_active',
     },
     CreatedAt: {
       type: DataTypes.DATE,
@@ -88,82 +40,31 @@ export const User = sequelize.define(
       defaultValue: DataTypes.NOW,
       field: 'created_at',
     },
-    UpdatedAt: {
-      type: DataTypes.DATE,
-      allowNull: true, // Permite nulo porque .NET no lo define
-      field: 'updated_at',
+    MongoId: {
+      type: DataTypes.STRING(64),
+      allowNull: true,
+      field: 'mongo_id',
     },
-  },
-  {
-    tableName: 'users',
-    timestamps: true,
-    createdAt: 'created_at',
-    updatedAt: 'updated_at',
-  }
-);
-
-// Modelo UserProfile (solo lectura en .NET o ignorado)
-export const UserProfile = sequelize.define(
-  'UserProfile',
-  {
-    Id: {
-      type: DataTypes.STRING(16),
-      primaryKey: true,
-      field: 'id',
-      defaultValue: () => generateUserId(),
+    Username: {
+      type: DataTypes.STRING(50),
+      allowNull: true,
+      unique: true,
+      field: 'username',
     },
-    UserId: {
-      type: DataTypes.INTEGER, // Ajustado a INTEGER para compatibilidad
-      allowNull: false,
-      field: 'user_id',
-      references: {
-        model: User,
-        key: 'id',
-      },
+    Name: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+      field: 'name',
     },
-    ProfilePicture: {
-      type: DataTypes.STRING(512),
-      defaultValue: '',
-      field: 'profile_picture',
+    Surname: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+      field: 'surname',
     },
     Phone: {
-      type: DataTypes.STRING(8),
-      allowNull: false,
+      type: DataTypes.STRING(20),
+      allowNull: true,
       field: 'phone',
-      validate: {
-        notEmpty: { msg: 'El número de teléfono es obligatorio.' },
-        len: {
-          args: [8, 8],
-          msg: 'El número de teléfono debe tener exactamente 8 dígitos.',
-        },
-        isNumeric: { msg: 'El teléfono solo debe contener números.' },
-      },
-    },
-  },
-  {
-    tableName: 'user_profiles',
-    timestamps: false,
-  }
-);
-
-// Modelo UserEmail (verificaciones, ignorado por .NET)
-export const UserEmail = sequelize.define(
-  'UserEmail',
-  {
-    Id: {
-      type: DataTypes.STRING(16),
-      primaryKey: true,
-      field: 'id',
-      defaultValue: () => generateUserId(),
-    },
-    UserId: {
-      type: DataTypes.INTEGER, // Ajustado a INTEGER
-      allowNull: false,
-      field: 'user_id',
-      references: {
-        model: User,
-        key: 'id',
-      },
     },
     EmailVerified: {
       type: DataTypes.BOOLEAN,
@@ -181,32 +82,6 @@ export const UserEmail = sequelize.define(
       allowNull: true,
       field: 'email_verification_token_expiry',
     },
-  },
-  {
-    tableName: 'user_emails',
-    timestamps: false,
-  }
-);
-
-// Modelo UserPasswordReset (recuperación de contraseña, ignorado por .NET)
-export const UserPasswordReset = sequelize.define(
-  'UserPasswordReset',
-  {
-    Id: {
-      type: DataTypes.STRING(16),
-      primaryKey: true,
-      field: 'id',
-      defaultValue: () => generateUserId(),
-    },
-    UserId: {
-      type: DataTypes.INTEGER, // Ajustado a INTEGER
-      allowNull: false,
-      field: 'user_id',
-      references: {
-        model: User,
-        key: 'id',
-      },
-    },
     PasswordResetToken: {
       type: DataTypes.STRING(256),
       allowNull: true,
@@ -217,23 +92,41 @@ export const UserPasswordReset = sequelize.define(
       allowNull: true,
       field: 'password_reset_token_expiry',
     },
+    RefreshToken: {
+      type: DataTypes.STRING(256),
+      allowNull: true,
+      field: 'refresh_token',
+    },
+    RefreshTokenExpiry: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      field: 'refresh_token_expiry',
+    },
+    CompanyMongoId: {
+      type: DataTypes.STRING(64),
+      allowNull: true,
+      field: 'company_mongo_id',
+    },
+    BranchMongoId: {
+      type: DataTypes.STRING(64),
+      allowNull: true,
+      field: 'branch_mongo_id',
+    },
+    VerificationOtp: {
+      type: DataTypes.STRING(6),
+      allowNull: true,
+      field: 'verification_otp',
+    },
+    VerificationOtpExpiry: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      field: 'verification_otp_expiry',
+    },
   },
   {
-    tableName: 'user_password_resets',
-    timestamps: false,
+    tableName: 'users',
+    timestamps: true,
+    createdAt: 'created_at',
+    updatedAt: false, // .NET no maneja updated_at
   }
 );
-
-// Definir las relaciones
-User.hasOne(UserProfile, { foreignKey: 'user_id', as: 'UserProfile', onDelete: 'CASCADE' });
-UserProfile.belongsTo(User, { foreignKey: 'user_id', as: 'User' });
-
-User.hasOne(UserEmail, { foreignKey: 'user_id', as: 'UserEmail', onDelete: 'CASCADE' });
-UserEmail.belongsTo(User, { foreignKey: 'user_id', as: 'User' });
-
-User.hasOne(UserPasswordReset, {
-  foreignKey: 'user_id',
-  as: 'UserPasswordReset',
-  onDelete: 'CASCADE',
-});
-UserPasswordReset.belongsTo(User, { foreignKey: 'user_id', as: 'User' });

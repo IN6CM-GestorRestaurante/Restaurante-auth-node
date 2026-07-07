@@ -2,7 +2,12 @@ import crypto from 'crypto';
 
 // Generate secure tokens matching .NET TokenGenerator
 export const generateEmailVerificationToken = () => {
-  return generateSecureToken(32); // 32 bytes = 256 bits
+  return generateOTPToken(); // Se usa OTP de 6 dígitos ahora
+};
+
+export const generateOTPToken = () => {
+  // Generar número de 6 dígitos
+  return Math.floor(100000 + Math.random() * 900000).toString();
 };
 
 export const generatePasswordResetToken = () => {
