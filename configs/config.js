@@ -27,6 +27,13 @@ export const config = {
     fromName: process.env.SMTP_FROM_NAME || 'Gestor Restaurante',
   },
 
+  // Resend (API HTTP) - reemplaza SMTP para el envio de emails, ya que Vercel
+  // bloquea las conexiones SMTP salientes en el plan gratuito.
+  resend: {
+    apiKey: process.env.RESEND_API_KEY,
+    fromEmail: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
+  },
+
   // File Upload Configuration
   upload: {
     maxSize: 5 * 1024 * 1024, // 5MB
