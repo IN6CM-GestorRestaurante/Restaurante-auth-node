@@ -99,29 +99,28 @@ export const registerUserHelper = async (userData) => {
       role: role || 'CLIENT',
     });
 
-    // Sincronizar el usuario con MongoDB (ServerAdmin)
-    let mongoId = null;
+    // Sincronizar el usuario con MongoDB (ServerUser). ServerAdmin purgó su propio
+    // modelo de usuario en Mongo (ver commit b354d60 de ServerAdmin), asi que el
+    // registro espejo ahora vive en ServerUser, que es quien realmente lo necesita
+    // para reservas/pedidos/reviews. Best-effort: si falla, ServerUser se
+    // auto-provisiona igual en la primera petición autenticada (ver su
+    // middlewares/auth.middleware.js).
     try {
-      console.log(`Syncing user ${email} with MongoDB...`);
-      const syncUrl = `${config.app.adminServiceUrl}/restaurant/v1/users/sync`;
-      const response = await axios.post(syncUrl, {
-        email: newUser.Email,
-        role: newUser.Role,
-      });
+      const syncUrl = `${config.app.userServiceUrl}/api/user/users/sync`;
+      const response = await axios.post(
+        syncUrl,
+        { email: newUser.Email, name, surname, username, phone, role: newUser.Role },
+        { headers: { 'x-internal-secret': config.jwt.secret } }
+      );
 
-      if (response.data && response.data.success) {
-        // Mongoose toJSON() expone 'uid' como ID del usuario
-        mongoId = response.data.user?.uid || response.data.user?._id;
-        if (mongoId) {
-          console.log(`User synced to MongoDB successfully. Mongo ID: ${mongoId}`);
-          await User.update({ MongoId: mongoId }, { where: { Id: newUser.Id } });
-          // Actualizar la instancia local del usuario
-          newUser.MongoId = mongoId;
-        }
+      const mongoId = response.data?.user?._id;
+      if (mongoId) {
+        await User.update({ MongoId: mongoId }, { where: { Id: newUser.Id } });
+        newUser.MongoId = mongoId;
       }
     } catch (syncErr) {
       console.error(
-        `Warning: User created in Postgres, but failed to sync to Mongo: ${syncErr.message}`
+        `Warning: User created in Postgres, but failed to sync to ServerUser (Mongo): ${syncErr.message}`
       );
     }
 

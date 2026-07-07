@@ -88,6 +88,7 @@ export const config = {
   app: {
     frontendUrl: process.env.FRONTEND_URL,
     adminServiceUrl: process.env.ADMIN_SERVICE_URL || 'http://localhost:3001',
+    userServiceUrl: process.env.USER_SERVICE_URL || 'http://localhost:3003',
   },
 
   // CORS Origins
