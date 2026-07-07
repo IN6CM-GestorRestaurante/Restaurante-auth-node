@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+import 'pg';
 import { initServer } from './configs/app.js';
 
 // Configurar variables de entorno
