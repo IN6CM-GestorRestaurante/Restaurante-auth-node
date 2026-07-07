@@ -136,3 +136,31 @@ export const validateResetPassword = [
 
   handleValidationErrors,
 ];
+
+/**
+ * Validaciones para cambio de contraseña autenticado
+ */
+export const validateChangePassword = [
+  body('currentPassword')
+    .notEmpty()
+    .withMessage('La contraseña actual es requerida'),
+
+  body('newPassword')
+    .notEmpty()
+    .withMessage('La nueva contraseña es obligatoria')
+    .isLength({ min: 6 })
+    .withMessage('La nueva contraseña debe tener al menos 6 caracteres'),
+
+  handleValidationErrors,
+];
+
+/**
+ * Validaciones para eliminación de cuenta
+ */
+export const validateDeleteAccount = [
+  body('password')
+    .notEmpty()
+    .withMessage('La contraseña es requerida para confirmar la eliminación'),
+
+  handleValidationErrors,
+];

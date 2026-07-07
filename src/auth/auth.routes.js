@@ -14,6 +14,8 @@ import {
   validateResendVerification,
   validateForgotPassword,
   validateResetPassword,
+  validateChangePassword,
+  validateDeleteAccount,
 } from '../../middlewares/validation.js';
 
 const router = Router();
@@ -150,6 +152,34 @@ router.post(
   '/profile/by-username',
   requestLimit,
   authController.getProfileByUsername
+);
+
+/**
+ * @swagger
+ * /api/v1/auth/change-password:
+ *   put:
+ *     tags: [Profile]
+ *     summary: Cambia la contraseña del usuario autenticado
+ */
+router.put(
+  '/change-password',
+  validateJWT,
+  validateChangePassword,
+  authController.changePassword
+);
+
+/**
+ * @swagger
+ * /api/v1/auth/account:
+ *   delete:
+ *     tags: [Profile]
+ *     summary: Elimina (desactiva) la cuenta del usuario autenticado
+ */
+router.delete(
+  '/account',
+  validateJWT,
+  validateDeleteAccount,
+  authController.deleteAccount
 );
 
 export default router;

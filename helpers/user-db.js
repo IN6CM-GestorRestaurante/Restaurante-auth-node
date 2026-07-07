@@ -201,3 +201,12 @@ export const updateUserProfilePicture = async (userId, profilePicture) => {
     throw new Error('Error al actualizar foto de perfil');
   }
 };
+
+export const deactivateUser = async (userId) => {
+  try {
+    await User.update({ Status: false }, { where: { Id: userId } });
+  } catch (error) {
+    console.error('Error desactivando usuario:', error);
+    throw new Error('Error al desactivar usuario');
+  }
+};

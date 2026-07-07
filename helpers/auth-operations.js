@@ -1,10 +1,11 @@
-import { saveRefreshToken } from './refresh-token.js';
+import { saveRefreshToken, revokeAllUserTokens } from './refresh-token.js';
 import crypto from 'crypto';
 import axios from 'axios';
 import {
   checkUserExists,
   createNewUser,
   findUserByEmailOrUsername,
+  findUserById,
   updateEmailVerificationToken,
   markEmailAsVerified,
   findUserByEmail,
@@ -12,6 +13,7 @@ import {
   updateUserPassword,
   findUserByEmailVerificationToken,
   findUserByPasswordResetToken,
+  deactivateUser,
 } from './user-db.js';
 import { User } from '../src/users/user.model.js';
 import {
@@ -398,6 +400,72 @@ export const resetPasswordHelper = async (token, newPassword) => {
     };
   } catch (error) {
     console.error('Error en resetPasswordHelper:', error);
+    throw error;
+  }
+};
+
+export const changePasswordHelper = async (userId, currentPassword, newPassword) => {
+  try {
+    const user = await findUserById(userId);
+    if (!user) {
+      throw new Error('Usuario no encontrado');
+    }
+
+    const isValidPassword = await verifyPassword(user.Password, currentPassword);
+    if (!isValidPassword) {
+      throw new Error('La contraseña actual es incorrecta');
+    }
+
+    const hashedPassword = await hashPassword(newPassword);
+    await updateUserPassword(user.Id, hashedPassword);
+
+    // Cerrar todas las sesiones activas para forzar re-login con la nueva contraseña
+    await revokeAllUserTokens(user.Id);
+
+    try {
+      const { sendPasswordChangedEmail } = await import('./email-service.js');
+      Promise.resolve()
+        .then(() => sendPasswordChangedEmail(user.Email, user.Name || user.Username || user.Email))
+        .catch((emailError) => {
+          console.error('Error sending password changed email:', emailError);
+        });
+    } catch (emailError) {
+      console.error('Error scheduling password changed email:', emailError);
+    }
+
+    return {
+      success: true,
+      message: 'Contraseña actualizada exitosamente',
+      data: { email: user.Email, changed: true },
+    };
+  } catch (error) {
+    console.error('Error en changePasswordHelper:', error);
+    throw error;
+  }
+};
+
+export const deleteAccountHelper = async (userId, password) => {
+  try {
+    const user = await findUserById(userId);
+    if (!user) {
+      throw new Error('Usuario no encontrado');
+    }
+
+    const isValidPassword = await verifyPassword(user.Password, password);
+    if (!isValidPassword) {
+      throw new Error('La contraseña es incorrecta');
+    }
+
+    await deactivateUser(user.Id);
+    await revokeAllUserTokens(user.Id);
+
+    return {
+      success: true,
+      message: 'Cuenta eliminada exitosamente',
+      data: { email: user.Email, deleted: true },
+    };
+  } catch (error) {
+    console.error('Error en deleteAccountHelper:', error);
     throw error;
   }
 };

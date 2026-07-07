@@ -5,6 +5,8 @@ import {
   resendVerificationEmailHelper,
   forgotPasswordHelper,
   resetPasswordHelper,
+  changePasswordHelper,
+  deleteAccountHelper,
 } from '../../helpers/auth-operations.js';
 import {
   getUserProfileHelper,
@@ -238,4 +240,52 @@ export const updateProfilePicture = asyncHandler(async (req, res) => {
     message: 'Foto de perfil actualizada exitosamente',
     data: user,
   });
+});
+
+export const changePassword = asyncHandler(async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const result = await changePasswordHelper(req.userId, currentPassword, newPassword);
+
+    res.status(200).json(result);
+  } catch (error) {
+    console.error('Error in changePassword controller:', error);
+
+    let statusCode = 400;
+    if (error.message.includes('no encontrado')) {
+      statusCode = 404;
+    } else if (error.message.includes('incorrecta')) {
+      statusCode = 401;
+    }
+
+    res.status(statusCode).json({
+      success: false,
+      message: error.message || 'Error al cambiar la contraseña',
+      error: error.message,
+    });
+  }
+});
+
+export const deleteAccount = asyncHandler(async (req, res) => {
+  try {
+    const { password } = req.body;
+    const result = await deleteAccountHelper(req.userId, password);
+
+    res.status(200).json(result);
+  } catch (error) {
+    console.error('Error in deleteAccount controller:', error);
+
+    let statusCode = 400;
+    if (error.message.includes('no encontrado')) {
+      statusCode = 404;
+    } else if (error.message.includes('incorrecta')) {
+      statusCode = 401;
+    }
+
+    res.status(statusCode).json({
+      success: false,
+      message: error.message || 'Error al eliminar la cuenta',
+      error: error.message,
+    });
+  }
 });
