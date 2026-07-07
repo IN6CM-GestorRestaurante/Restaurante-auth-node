@@ -45,13 +45,11 @@ export const dbConnection = async () => {
     console.log('PostgreSQL | Connected to PostgreSQL');
     console.log('PostgreSQL | Connection to database established');
 
-    // Sincronizar modelos en desarrollo
-    if (process.env.NODE_ENV === 'development') {
-      const syncLogging =
-        process.env.DB_SQL_LOGGING === 'true' ? console.log : false;
-      await sequelize.sync({ alter: true, logging: syncLogging });
-      console.log('PostgreSQL | Models synchronized with database');
-    }
+    // Sincronizar modelos en desarrollo o producción
+    const syncLogging =
+      process.env.DB_SQL_LOGGING === 'true' ? console.log : false;
+    await sequelize.sync({ alter: true, logging: syncLogging });
+    console.log('PostgreSQL | Models synchronized with database');
   } catch (error) {
     console.error('PostgreSQL | Could not connect to PostgreSQL');
     console.error('PostgreSQL | Error:', error.message);
