@@ -50,6 +50,22 @@ export const dbConnection = async () => {
       process.env.DB_SQL_LOGGING === 'true' ? console.log : false;
     await sequelize.sync({ alter: true, logging: syncLogging });
     console.log('PostgreSQL | Models synchronized with database');
+
+    // ----------------------------------------------
+    //               SEEDER AUTOMÁTICO
+    // ----------------------------------------------
+    try {
+      const { User } = await import('../src/users/user.model.js');
+      const { seedDatabase } = await import('../seed.js');
+      const count = await User.count();
+      if (count === 0) {
+        console.log('PostgreSQL | Base de datos vacía detectada. Ejecutando seeder automático...');
+        await seedDatabase();
+      }
+    } catch (seedErr) {
+      console.error('PostgreSQL | Error ejecutando seeder automático:', seedErr);
+    }
+
   } catch (error) {
     console.error('PostgreSQL | Could not connect to PostgreSQL');
     console.error('PostgreSQL | Error:', error.message);
