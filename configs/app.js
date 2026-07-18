@@ -41,6 +41,23 @@ const routes = (app) => {
     });
   });
   
+  // Ruta base de Bienvenida
+  app.get('/', (req, res) => {
+    res.status(200).json({
+      success: true,
+      service: 'Restaurante Authentication Node Service',
+      version: '1.0.0',
+      status: 'online',
+      message: 'API en línea. Usa los endpoints documentados abajo.',
+      endpoints: {
+        health: `${BASE_PATH}/health`,
+        auth: `${BASE_PATH}/auth`,
+        users: `${BASE_PATH}/users`
+      },
+      timestamp: new Date().toISOString()
+    });
+  });
+  
   // 404 handler (standardized)
   app.use(notFound);
 };
