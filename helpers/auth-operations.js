@@ -187,7 +187,12 @@ export const loginUserHelper = async (emailOrUsername, password) => {
     const role = user.Role || 'CLIENT';
     const accessToken = await generateJWT(
       user.Id.toString(),
-      { role, email: user.Email }, // claims: role y email
+      { 
+        role, 
+        email: user.Email,
+        companyMongoId: user.CompanyMongoId,
+        branchMongoId: user.BranchMongoId
+      }, // claims: role, email, companyMongoId, branchMongoId
       { expiresIn: config.jwt.expiresIn }
     );
 
@@ -205,6 +210,8 @@ export const loginUserHelper = async (emailOrUsername, password) => {
       profilePicture: fullUser.profilePicture,
       role: fullUser.role,
       mongoId: fullUser.mongoId,
+      companyId: fullUser.companyId,
+      branchId: fullUser.branchId,
     };
 
     // Calcular segundos de expiración

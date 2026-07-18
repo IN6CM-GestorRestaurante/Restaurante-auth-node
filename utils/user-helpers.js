@@ -22,6 +22,8 @@ export const buildUserResponse = (user) => {
     role: user.Role || 'CLIENT', // Uso de rol plano directamente
     status: user.Status, // Mapeado a is_active
     mongoId: user.MongoId || '', // Enlace a MongoDB
+    companyId: user.CompanyMongoId || '', // Enlace a Empresa
+    branchId: user.BranchMongoId || '', // Enlace a Sucursal
     isEmailVerified: user.UserEmail ? user.UserEmail.EmailVerified : false,
     createdAt: user.CreatedAt,
     updatedAt: user.UpdatedAt,
